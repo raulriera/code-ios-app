@@ -727,17 +727,25 @@ class Session: ObservableObject {
             let fiat = Fiat(currency: amount.rate.currency, amount: amount.fiat)
             
             code = Code.Payload(
-                kind: .requestPayment,
+                kind: .login,
                 fiat: fiat,
                 nonce: .nonce
             )
             
+            let verifierKey = KeyPair(seed: Seed32(base58: "")!)
+            
             Task {
-                try await client.sendRequestToReceiveBill(
-                    destination: organizer.primaryVault,
-                    fiat: fiat,
+                try await client.sendRequestToLogin(
+                    domain: Domain("app.getcode.com", supportSubdomains: true)!,
+                    verifier: verifierKey,
                     rendezvous: code.rendezvous
                 )
+                
+//                try await client.sendRequestToReceiveBill(
+//                    destination: organizer.primaryVault,
+//                    fiat: fiat,
+//                    rendezvous: code.rendezvous
+//                )
             }
         }
         
@@ -746,7 +754,7 @@ class Session: ObservableObject {
         presentationState = .visible(isReceived ? .pop : .slide)
         billState = billState
             .bill(
-                .request(.init(
+                .login(.init(
                     kinAmount: amount,
                     data: code.codeData(),
                     request: request
