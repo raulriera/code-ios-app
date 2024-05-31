@@ -13,6 +13,7 @@ struct InterceptorFactory: Sendable {
     func makeInterceptors<Request, Response>() -> [ClientInterceptor<Request, Response>] {
         [
             UserAgentInterceptor(),
+            LoggingInterceptor(),
         ]
     }
 }
